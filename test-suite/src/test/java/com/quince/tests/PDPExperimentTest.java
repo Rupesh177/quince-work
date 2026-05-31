@@ -29,156 +29,190 @@ public class PDPExperimentTest extends BaseTest {
 
     @Test(groups = {"smoke", "experiment"})
     @Story("Add to Cart")
-    @Description("Test add to cart with resolved variant")
-    public void testAddToCart_ResolvedVariant() {
-        // Navigate
-        DriverManager.getDriver().get(config.get("base.url", "http://localhost:5173") + "/product/DEMO_SKU");
+    @Description("Test add to cart with Control variant")
+    public void testAddToCart_ControlVariant() throws InterruptedException {
+        String flagKey = "pdp_cta_position";
 
-        // Detect variant
+        ExperimentCoverageHelper coverageHelper =
+                new ExperimentCoverageHelper(
+                        variantResolver,
+                        new ExperimentUserService(new FakerDataService())
+                );
+
+        String userId = coverageHelper.findUserForVariation(
+                flagKey,
+                "control",
+                50
+        );
+
+        DriverManager.getDriver().get(
+                config.get("base.url", "http://localhost:5173") + "/product/DEMO_SKU"
+        );
+
         ExperimentContext context = variantResolver.resolve(
-                "pdp_cta_position",
-                testUserId,
+                flagKey,
+                userId,
                 DriverManager.getDriver().getUnderlyingDriver()
         );
 
-        logger.info("Detected variant: {}", context.variationKey());
-//        Assert.assertEquals(context.variationKey(), "control",
-//                "Expected control variant");
+        Assert.assertEquals(context.variationKey(), "control", "Expected control variant");
+        Assert.assertTrue(context.enabled(), "Feature flag should be enabled");
 
+        String ctaPosition = variantResolver.getStringVariable(
+                flagKey,
+                "cta_position",
+                userId
+        );
 
-        // Interact
+        Assert.assertEquals(
+                ctaPosition,
+                "top",
+                "Control variant should have cta_position=top"
+        );
+
+        logger.info(
+                "Resolved AB state | User={}, Variation={}, cta_position={}",
+                userId,
+                context.variationKey(),
+                ctaPosition
+        );
+
         PDPActions pdp = new PDPActions(DriverManager.getDriver());
-        Assert.assertTrue(pdp.isAddToCartPresent(),
-                "Add to cart button should be visible");
+
+        Assert.assertTrue(
+                pdp.isAddToCartPresent(),
+                "Add to cart button should be visible"
+        );
 
         pdp.addToCart();
+
         logger.info("Add to cart successful");
     }
 
-//    @Test(groups = {"smoke", "experiment"})
-//    @Story("PDP CTA Control Variant")
-//    @Description("Validate cta_label variable for control variant")
-//    public void testControlVariantCtaLabel() {
-//        String flagKey = "pdp_cta_position";
-//        String expectedVariation = "control";
-//
-//        ExperimentCoverageHelper coverageHelper =
-//                new ExperimentCoverageHelper(
-//                        variantResolver,
-//                        new ExperimentUserService(new FakerDataService())
-//                );
-//
-//        String userId = coverageHelper.findUserForVariation(
-//                flagKey,
-//                expectedVariation,
-//                100
-//        );
-//
-//        DriverManager.getDriver().get(
-//                config.get("base.url", "http://localhost:5173") + "/product/DEMO_SKU"
-//        );
-//
-//        ExperimentContext context = variantResolver.resolve(
-//                flagKey,
-//                userId,
-//                DriverManager.getDriver().getUnderlyingDriver()
-//        );
-//
-//        Assert.assertEquals(
-//                context.variationKey(),
-//                expectedVariation,
-//                "Resolved variation should be control"
-//        );
-//
-//        String expectedCtaLabel = variantResolver.getStringVariable(
-//                flagKey,
-//                "cta_label",
-//                userId
-//        );
-//
-//        PDPActions pdp = new PDPActions(DriverManager.getDriver());
-//        String actualCtaLabel = pdp.getCtaLabel();
-//
-//        logger.info(
-//                "CTA Label Validation | Variation={}, User={}, ExpectedLabel={}, ActualLabel={}",
-//                context.variationKey(),
-//                userId,
-//                expectedCtaLabel,
-//                actualCtaLabel
-//        );
-//
-//        Assert.assertEquals(
-//                actualCtaLabel,
-//                expectedCtaLabel,
-//                "CTA label should match Optimizely variable for control"
-//        );
-//    }
-//
-//    @Test(groups = {"smoke", "experiment"})
-//    @Story("PDP CTA Treatment A Variant")
-//    @Description("Validate cta_label variable for treatment_a variant")
-//    public void testTreatmentAVariantCtaLabel() {
-//        String flagKey = "pdp_cta_position";
-//        String expectedVariation = "treatment_a";
-//
-//        ExperimentCoverageHelper coverageHelper =
-//                new ExperimentCoverageHelper(
-//                        variantResolver,
-//                        new ExperimentUserService(new FakerDataService())
-//                );
-//
-//        String userId = coverageHelper.findUserForVariation(
-//                flagKey,
-//                expectedVariation,
-//                100
-//        );
-//
-//        DriverManager.getDriver().get(
-//                config.get("base.url", "http://localhost:5173") + "/product/DEMO_SKU"
-//        );
-//
-//        ExperimentContext context = variantResolver.resolve(
-//                flagKey,
-//                userId,
-//                DriverManager.getDriver().getUnderlyingDriver()
-//        );
-//
-//        Assert.assertEquals(
-//                context.variationKey(),
-//                expectedVariation,
-//                "Resolved variation should be treatment_a"
-//        );
-//
-//        Boolean expectedCartButton = variantResolver.getBooleanVariable(
-//                flagKey,
-//                "cart_button",
-//                userId
-//        );
-//
-//        Assert.assertNotNull(
-//                expectedCartButton,
-//                "cart_button variable should not be null"
-//        );
-//
-//
-//        PDPActions pdp = new PDPActions(DriverManager.getDriver());
-//
-//        boolean actualCartButton = pdp.isCartPresent();
-//
-//        logger.info(
-//                "Cart button display Validation | Variation={}, User={}, ExpectedCartButton={}, ActualCartButton={}",
-//                context.variationKey(),
-//                userId,
-//                expectedCartButton,
-//                actualCartButton
-//        );
-//
-//        Assert.assertEquals(
-//                actualCartButton,
-//                expectedCartButton,
-//                "Cart button visibility should match Optimizely cart_button variable"
-//        );
-//    }
+    @Test(groups = {"smoke", "experiment"})
+    @Story("PDP CTA Control Variant")
+    @Description("Validate cta_label variable for control variant")
+    public void testControlVariantCtaLabel() {
+        String flagKey = "pdp_cta_position";
+        String expectedVariation = "control";
+
+        ExperimentCoverageHelper coverageHelper =
+                new ExperimentCoverageHelper(
+                        variantResolver,
+                        new ExperimentUserService(new FakerDataService())
+                );
+
+        String userId = coverageHelper.findUserForVariation(
+                flagKey,
+                expectedVariation,
+                100
+        );
+
+        DriverManager.getDriver().get(
+                config.get("base.url", "http://localhost:5173") + "/product/DEMO_SKU"
+        );
+
+        ExperimentContext context = variantResolver.resolve(
+                flagKey,
+                userId,
+                DriverManager.getDriver().getUnderlyingDriver()
+        );
+
+        Assert.assertEquals(
+                context.variationKey(),
+                expectedVariation,
+                "Resolved variation should be control"
+        );
+
+        String expectedCtaLabel = variantResolver.getStringVariable(
+                flagKey,
+                "cta_label",
+                userId
+        );
+
+        PDPActions pdp = new PDPActions(DriverManager.getDriver());
+        String actualCtaLabel = pdp.getCtaLabel();
+
+        logger.info(
+                "CTA Label Validation | Variation={}, User={}, ExpectedLabel={}, ActualLabel={}",
+                context.variationKey(),
+                userId,
+                expectedCtaLabel,
+                actualCtaLabel
+        );
+
+        Assert.assertEquals(
+                actualCtaLabel,
+                expectedCtaLabel,
+                "CTA label should match Optimizely variable for control"
+        );
+    }
+
+    @Test(groups = {"smoke", "experiment"})
+    @Story("PDP CTA Treatment A Variant")
+    @Description("Validate cta_label variable for treatment_a variant")
+    public void testTreatmentAVariantCtaLabel() {
+        String flagKey = "pdp_cta_position";
+        String expectedVariation = "treatment_a";
+
+        ExperimentCoverageHelper coverageHelper =
+                new ExperimentCoverageHelper(
+                        variantResolver,
+                        new ExperimentUserService(new FakerDataService())
+                );
+
+        String userId = coverageHelper.findUserForVariation(
+                flagKey,
+                expectedVariation,
+                100
+        );
+
+        DriverManager.getDriver().get(
+                config.get("base.url", "http://localhost:5173") + "/product/DEMO_SKU"
+        );
+
+        ExperimentContext context = variantResolver.resolve(
+                flagKey,
+                userId,
+                DriverManager.getDriver().getUnderlyingDriver()
+        );
+
+        Assert.assertEquals(
+                context.variationKey(),
+                expectedVariation,
+                "Resolved variation should be treatment_a"
+        );
+
+        Boolean expectedCartButton = variantResolver.getBooleanVariable(
+                flagKey,
+                "cart_button",
+                userId
+        );
+
+        Assert.assertNotNull(
+                expectedCartButton,
+                "cart_button variable should not be null"
+        );
+
+
+        PDPActions pdp = new PDPActions(DriverManager.getDriver());
+
+        boolean actualCartButton = pdp.isCartPresent();
+
+        logger.info(
+                "Cart button display Validation | Variation={}, User={}, ExpectedCartButton={}, ActualCartButton={}",
+                context.variationKey(),
+                userId,
+                expectedCartButton,
+                actualCartButton
+        );
+
+        Assert.assertEquals(
+                actualCartButton,
+                expectedCartButton,
+                "Cart button visibility should match Optimizely cart_button variable"
+        );
+    }
 
     @Test(groups = {"regression", "experiment"}, dataProvider = "allPriceDisplayVariants")
     @Story("Pricing Display")
@@ -195,7 +229,7 @@ public class PDPExperimentTest extends BaseTest {
         String userId = coverageHelper.findUserForVariation(
                 flagKey,
                 expectedVariation,
-                200
+                50
         );
 
         DriverManager.getDriver().get(

@@ -83,7 +83,7 @@ public class PDPActions extends BaseActions {
         logger.info("Adding product to cart");
         
         // Fallback chain
-        Optional<String> successfulCta = tryClick(CTA_BOTTOM, "top-cta")
+        Optional<String> successfulCta = tryClick(CTA_TOP, "top-cta")
             .or(() -> tryClick(CTA_BOTTOM, "bottom-cta"))
             .or(() -> tryClick(CTA_STICKY, "sticky-cta"));
 
