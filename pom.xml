@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.quince</groupId>
+    <artifactId>quince-test-automation-parent</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+    <name>Quince Test Automation Suite (Parent)</name>
+
+    <modules>
+        <module>framework-core</module>
+        <module>framework-ui</module>
+        <module>framework-api</module>
+        <module>framework-db</module>
+        <module>framework-data</module>
+        <module>test-suite</module>
+        <module>framework-experiment</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Dependency Versions (Non-Negotiable) -->
+        <selenium.version>4.15.0</selenium.version>
+        <testng.version>7.8.0</testng.version>
+        <rest-assured.version>5.3.2</rest-assured.version>
+        <allure.version>2.25.0</allure.version>
+        <log4j.version>2.21.1</log4j.version>
+        <optimizely.version>4.1.0</optimizely.version>
+        <fakerjava.version>1.0.2</fakerjava.version>
+        <hikaricp.version>5.1.0</hikaricp.version>
+        <vault.version>4.1.0</vault.version>
+        <jackson.version>2.16.1</jackson.version>
+        <junit.version>4.13.2</junit.version>
+        <slf4j.version>2.0.10</slf4j.version>
+        <assertj.version>3.24.1</assertj.version>
+        <commons-lang3.version>3.14.0</commons-lang3.version>
+        <commons-io.version>2.15.0</commons-io.version>
+        <healenium.version>3.5.1</healenium.version>
+        <browsermob-proxy.version>2.1.5</browsermob-proxy.version>
+        <webdrivermanager.version>5.6.3</webdrivermanager.version>
+
+        <!-- Plugin Versions -->
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
+        <allure-maven.version>2.15.2</allure-maven.version>
+        <maven-shade-plugin.version>3.5.0</maven-shade-plugin.version>
+
+        <suite>regression-sequential</suite>
+        <env>local</env>
+        <driver.type>selenium</driver.type>
+        <parallel.enabled>false</parallel.enabled>
+        <parallel.mode>none</parallel.mode>
+        <parallel.thread.count>3</parallel.thread.count>
+        <browser>chrome</browser>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Selenium 4.x -->
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-java</artifactId>
+                <version>${selenium.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-chrome-driver</artifactId>
+                <version>${selenium.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-firefox-driver</artifactId>
+                <version>${selenium.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-edge-driver</artifactId>
+                <version>${selenium.version}</version>
+            </dependency>
+
+            <!-- TestNG 7.x -->
+            <dependency>
+                <groupId>org.testng</groupId>
+                <artifactId>testng</artifactId>
+                <version>${testng.version}</version>
+            </dependency>
+
+            <!-- RestAssured -->
+            <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>${rest-assured.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-api</artifactId>
+                <version>${selenium.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-support</artifactId>
+                <version>${selenium.version}</version>
+            </dependency>
+            <!-- Allure 2.x -->
+            <dependency>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-testng</artifactId>
+                <version>${allure.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-rest-assured</artifactId>
+                <version>${allure.version}</version>
+            </dependency>
+
+            <!-- Log4j2 -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j2-impl</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
+            <!-- SLF4J API -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <!-- Optimizely SDK -->
+            <dependency>
+                <groupId>com.optimizely.ab</groupId>
+                <artifactId>core-api</artifactId>
+                <version>${optimizely.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.optimizely.ab</groupId>
+                <artifactId>core-httpclient-impl</artifactId>
+                <version>${optimizely.version}</version>
+            </dependency>
+
+            <!-- Java Faker -->
+            <dependency>
+                <groupId>com.github.javafaker</groupId>
+                <artifactId>javafaker</artifactId>
+                <version>${fakerjava.version}</version>
+            </dependency>
+
+            <!-- HikariCP -->
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikaricp.version}</version>
+            </dependency>
+
+            <!-- Vault Client -->
+            <dependency>
+                <groupId>com.bettercloud</groupId>
+                <artifactId>vault-java-driver</artifactId>
+                <version>${vault.version}</version>
+            </dependency>
+
+            <!-- Jackson for JSON -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <!-- AssertJ -->
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+            </dependency>
+
+            <!-- Commons -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+
+            <!-- Healenium Web -->
+            <dependency>
+                <groupId>com.epam.healenium</groupId>
+                <artifactId>healenium-web</artifactId>
+                <version>${healenium.version}</version>
+            </dependency>
+
+            <!-- BrowserMob Proxy -->
+            <dependency>
+                <groupId>net.lightbody.bmp</groupId>
+                <artifactId>browsermob-core</artifactId>
+                <version>${browsermob-proxy.version}</version>
+            </dependency>
+
+            <!-- YAML support -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <!-- WebDriverManager -->
+            <dependency>
+                <groupId>io.github.bonigarcia</groupId>
+                <artifactId>webdrivermanager</artifactId>
+                <version>${webdrivermanager.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>${maven.compiler.source}</source>
+                        <target>${maven.compiler.target}</target>
+                        <release>${maven.compiler.target}</release>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+
+                    <configuration>
+                        <suiteXmlFiles>
+                            <suiteXmlFile>
+                                src/test/resources/suites/${suite}.xml
+                            </suiteXmlFile>
+                        </suiteXmlFiles>
+
+                        <systemPropertyVariables>
+                            <env>${env}</env>
+                            <driver.type>${driver.type}</driver.type>
+                            <parallel.enabled>${parallel.enabled}</parallel.enabled>
+                            <browser>${browser}</browser>
+                        </systemPropertyVariables>
+                    </configuration>
+                </plugin>
+
+
+                <plugin>
+                    <groupId>io.qameta.allure</groupId>
+                    <artifactId>allure-maven</artifactId>
+                    <version>${allure-maven.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

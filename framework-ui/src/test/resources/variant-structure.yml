@@ -1,0 +1,37 @@
+# Variant structural definitions for heuristic detection
+pdp_cta_position:
+  control:
+    present:
+      - "#add-to-cart-top"
+    absent:
+      - "#sticky-bar"
+      - "#add-to-cart-modal"
+
+  treatment_a:
+    present:
+      - "#add-to-cart-bottom"
+    absent:
+      - "#sticky-bar"
+      - "#add-to-cart-top"
+
+  treatment_b:
+    present:
+      - "#sticky-bar"
+      - "#sticky-bar-cta"
+    absent:
+      - "#add-to-cart-top"
+      - "#add-to-cart-bottom"
+
+pdp_price_display:
+  control:
+    present:
+      - "[data-testid='product-price']"
+    absent:
+      - "#price-modal"
+
+  treatment_a:
+    present:
+      - "#price-modal"
+      - ".modal-overlay"
+    absent:
+      - "[data-testid='product-price']"

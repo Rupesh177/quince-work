@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/framework-api/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-api/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-core/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-core/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-data/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-data/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-db/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-db/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-experiment/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-experiment/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-ui/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/framework-ui/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test-suite/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/test-suite/src/main/resources" charset="UTF-8" />
+  </component>
+</project>

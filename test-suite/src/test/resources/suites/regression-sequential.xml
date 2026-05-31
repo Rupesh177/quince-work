@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Regression Tests (Sequential)" parallel="none" thread-count="1">
+
+    <listeners>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+        <listener class-name="com.quince.framework.core.listener.FlakyTestListener"/>
+    </listeners>
+
+    <test name="Debug">
+        <classes>
+            <class name="com.quince.tests.PDPExperimentTest"/>
+        </classes>
+    </test>
+
+    <!--    <test name="Smoke Tests" enabled="true">-->
+    <!--        <groups>-->
+    <!--            <run>-->
+    <!--                <include name="smoke"/>-->
+    <!--            </run>-->
+    <!--        </groups>-->
+    <!--        <packages>-->
+    <!--            <package name="com.quince.tests"/>-->
+    <!--        </packages>-->
+    <!--    </test>-->
+
+    <!--    <test name="Experiment Tests" enabled="true">-->
+    <!--        <groups>-->
+    <!--            <run>-->
+    <!--                <include name="experiment"/>-->
+    <!--                <exclude name="smoke"/> &lt;!&ndash; avoid double-running smoke+experiment tagged tests &ndash;&gt;-->
+    <!--            </run>-->
+    <!--        </groups>-->
+    <!--        <packages>-->
+    <!--            <package name="com.quince.tests"/>  &lt;!&ndash; use same root package unless experiment subpackage exists &ndash;&gt;-->
+    <!--        </packages>-->
+    <!--    </test>-->
+
+    <!--    <test name="Regression Tests" enabled="true">-->
+    <!--        <groups>-->
+    <!--            <run>-->
+    <!--                <include name="regression"/>-->
+    <!--                <exclude name="smoke"/>     &lt;!&ndash; already ran above &ndash;&gt;-->
+    <!--                <exclude name="experiment"/> &lt;!&ndash; already ran above &ndash;&gt;-->
+    <!--                <exclude name="flaky"/>-->
+    <!--            </run>-->
+    <!--        </groups>-->
+    <!--        <packages>-->
+    <!--            <package name="com.quince.tests"/>-->
+    <!--        </packages>-->
+    <!--    </test>-->
+
+</suite>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Regression Tests (Parallel)" parallel="methods" thread-count="3">
+    <listeners>
+        <listener class-name="io.qameta.allure.testng.AllureTestNg"/>
+        <listener class-name="com.quince.framework.core.listener.FlakyTestListener"/>
+    </listeners>
+
+    <test name="Regression Tests (Parallel)" enabled="true">
+        <groups>
+            <run>
+                <include name="regression"/>
+                <exclude name="flaky"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="com.quince.tests.*"/>
+        </packages>
+    </test>
+</suite>

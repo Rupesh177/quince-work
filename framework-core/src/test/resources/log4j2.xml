@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration packages="com.quince.framework">
+    <Properties>
+        <Property name="log.path">target/logs</Property>
+        <Property name="log.level">INFO</Property>
+    </Properties>
+
+    <Appenders>
+        <!-- Console Appender with JSON Layout for structured logging -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <JsonTemplateLayout eventTemplateUri="classpath:EcsLayout.json"/>
+        </Console>
+
+        <!-- File Appender with rolling policy -->
+        <RollingFile name="File" fileName="${log.path}/quince-tests.log"
+                     filePattern="${log.path}/quince-tests-%d{yyyy-MM-dd}-%i.log">
+            <JsonTemplateLayout eventTemplateUri="classpath:EcsLayout.json"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="100MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="10"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="${log.level}">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
+        </Root>
+        <Logger name="org.selenium" level="WARN"/>
+        <Logger name="org.apache.http" level="WARN"/>
+        <Logger name="com.zaxxer.hikari" level="INFO"/>
+    </Loggers>
+</Configuration>

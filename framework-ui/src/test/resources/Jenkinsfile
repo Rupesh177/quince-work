@@ -1,0 +1,149 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(name: 'BROWSER', choices: ['chrome', 'firefox', 'edge'], description: 'Browser to use')
+        choice(name: 'ENV', choices: ['local', 'qa', 'staging'], description: 'Environment')
+        choice(name: 'SUITE', choices: ['smoke', 'regression', 'experiment'], description: 'Test suite')
+        choice(name: 'DRIVER_TYPE', choices: ['selenium', 'playwright'], description: 'Driver type')
+        booleanParam(name: 'PARALLEL_ENABLED', defaultValue: false, description: 'Run tests in parallel')
+        booleanParam(name: 'ENABLE_TIA', defaultValue: false, description: 'Enable Test Impact Analysis')
+        booleanParam(name: 'ENABLE_HEALING', defaultValue: true, description: 'Enable auto-healing')
+    }
+
+    environment {
+        JAVA_HOME = '/usr/lib/jvm/java-21-openjdk'
+        MAVEN_HOME = '/usr/share/maven'
+        OPTIMIZELY_SDK_KEY = credentials('optimizely-sdk-key')
+        QUINCE_DB_PASSWORD = credentials('db-password')
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                script {
+                    env.BUILD_DESC = "Browser: ${params.BROWSER} | Env: ${params.ENV} | Suite: ${params.SUITE}"
+                    echo "Build: ${env.BUILD_DESC}"
+                }
+            }
+        }
+
+        stage('Compile & Lint') {
+            steps {
+                script {
+                    sh '''
+                        echo "Compiling project..."
+                        mvn clean compile -DskipTests
+                    '''
+                }
+            }
+        }
+
+        stage('Test Impact Analysis') {
+            when {
+                expression { params.ENABLE_TIA && env.CHANGE_ID }
+            }
+            steps {
+                script {
+                    sh '''
+                        echo "Running Test Impact Analysis..."
+                        # TIA logic here: detect changed files, map to affected tests
+                    '''
+                }
+            }
+        }
+
+        stage('API Tests') {
+            parallel {
+                stage('API Smoke') {
+                    steps {
+                        script {
+                            sh '''
+                                mvn test -Dtest=*ApiTest -Dgroups=smoke \
+                                  -Denv=${ENV} -Ddriver.type=${DRIVER_TYPE}
+                            '''
+                        }
+                    }
+                }
+                stage('API Experiments') {
+                    steps {
+                        script {
+                            sh '''
+                                mvn test -Dtest=*ApiTest -Dgroups=experiment \
+                                  -Denv=${ENV} -Ddriver.type=${DRIVER_TYPE}
+                            '''
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('UI Tests') {
+            steps {
+                script {
+                    def parallelFlag = params.PARALLEL_ENABLED ? "true" : "false"
+                    def suite = params.SUITE == 'smoke' ? 'regression-sequential' : \
+                               params.PARALLEL_ENABLED ? 'regression-parallel' : 'regression-sequential'
+
+                    catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                        sh '''
+                            mvn test \
+                              -Denv=${ENV} \
+                              -Dbrowser=${BROWSER} \
+                              -Ddriver.type=${DRIVER_TYPE} \
+                              -Dparallel.enabled=''' + parallelFlag + ''' \
+                              -Dheal.enabled=${ENABLE_HEALING} \
+                              -Dsuite=''' + suite + '''
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Allure Report') {
+            steps {
+                script {
+                    sh 'mvn -pl test-suite allure:report'
+                    publishHTML([
+                        reportDir: 'test-suite/target/allure-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Allure Report',
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true
+                    ])
+                }
+            }
+        }
+
+        stage('Push Metrics to Grafana') {
+            steps {
+                script {
+                    sh '''
+                        echo "Publishing metrics to InfluxDB..."
+                        # Parse test results and push to InfluxDB
+                    '''
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'test-suite/target/allure-report/**,test-suite/target/allure-results/**', allowEmptyArchive: true
+            archiveArtifacts artifacts: '**/target/**/*.png', allowEmptyArchive: true
+        }
+        failure {
+            script {
+                echo "Tests failed. Attempting to create Jira bug..."
+                // Jira bug creation logic here
+            }
+        }
+        unstable {
+            script {
+                echo "Tests unstable. Slack notification..."
+            }
+        }
+    }
+}

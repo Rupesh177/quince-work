@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  app:
+    image: nginx:latest
+    ports:
+      - "3000:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - quince-network
+
+  api:
+    image: quince-api:latest
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.api
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_NAME: quince_test
+      OPTIMIZELY_SDK_KEY: ${OPTIMIZELY_SDK_KEY}
+    networks:
+      - quince-network
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: quince_test
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - quince-network
+
+  healenium-backend:
+    image: healenium/healenium-backend:latest
+    ports:
+      - "7878:7878"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://healenium-postgres:5432/healenium
+      SPRING_DATASOURCE_USERNAME: healenium
+      SPRING_DATASOURCE_PASSWORD: healenium
+    depends_on:
+      - healenium-postgres
+    networks:
+      - quince-network
+
+  healenium-postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: healenium
+      POSTGRES_PASSWORD: healenium
+      POSTGRES_DB: healenium
+    volumes:
+      - healenium-data:/var/lib/postgresql/data
+    networks:
+      - quince-network
+
+  influxdb:
+    image: influxdb:2.7
+    environment:
+      INFLUXDB_DB: quince_metrics
+      INFLUXDB_ADMIN_USER: admin
+      INFLUXDB_ADMIN_PASSWORD: admin
+    ports:
+      - "8086:8086"
+    volumes:
+      - influx-data:/var/lib/influxdb2
+    networks:
+      - quince-network
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./reporting/grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - influxdb
+    networks:
+      - quince-network
+
+networks:
+  quince-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  healenium-data:
+  influx-data:
+  grafana-data:
