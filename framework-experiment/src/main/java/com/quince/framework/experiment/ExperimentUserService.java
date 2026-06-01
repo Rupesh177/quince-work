@@ -6,7 +6,6 @@ import com.quince.framework.data.DataService;
 
 import java.util.UUID;
 
-// TODO: Replace DataBuilder with dataService.create(UserData.class)
 // once record-based test data creation is supported.
 
 public class ExperimentUserService {

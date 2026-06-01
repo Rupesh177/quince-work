@@ -1,12 +1,17 @@
 package com.quince.framework.ui.actions;
 
 import com.quince.framework.core.driver.UIDriver;
+import com.quince.framework.core.healing.ElementIntent;
+import com.quince.framework.core.healing.HealingManager;
 import io.qameta.allure.Allure;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+
+import java.util.Optional;
 
 /**
  * Abstract base class for all action classes.
@@ -14,7 +19,8 @@ import org.openqa.selenium.TimeoutException;
  */
 public abstract class BaseActions {
     protected static final Logger logger = LogManager.getLogger(BaseActions.class);
-    
+    private final HealingManager healingManager = new HealingManager();
+
     protected final UIDriver driver;
     private static final int MAX_RETRIES = 2;
     private static final int RETRY_DELAY_MS = 500;
@@ -72,9 +78,9 @@ public abstract class BaseActions {
      */
     protected String getAttribute(By locator, String attributeName) {
         return executeWithRetry(
-            () -> driver.getAttribute(locator, attributeName),
-            "getAttribute:" + attributeName,
-            locator
+                () -> driver.getAttribute(locator, attributeName),
+                "getAttribute:" + attributeName,
+                locator
         );
     }
 
@@ -88,8 +94,8 @@ public abstract class BaseActions {
         } catch (TimeoutException e) {
             logger.error("Timeout waiting for visible element: {}", locator);
             driver.takeScreenshot("visibility-timeout-" + System.currentTimeMillis());
-            Allure.addAttachment("visibility-timeout", "text/plain", 
-                "Timeout waiting for: " + locator);
+            Allure.addAttachment("visibility-timeout", "text/plain",
+                    "Timeout waiting for: " + locator);
             throw e;
         }
     }
@@ -127,17 +133,17 @@ public abstract class BaseActions {
     private <T> T executeWithRetry(Executable<T> operation, String operationName, By locator) {
         for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             try {
-                logger.debug("Executing {} (attempt {}/{}): {}", 
-                    operationName, attempt, MAX_RETRIES, locator);
+                logger.debug("Executing {} (attempt {}/{}): {}",
+                        operationName, attempt, MAX_RETRIES, locator);
                 T result = operation.execute();
                 if (attempt > 1) {
                     logger.info("Retry successful on attempt {}", attempt);
                 }
                 return result;
             } catch (NoSuchElementException | TimeoutException e) {
-                logger.warn("{} failed (attempt {}/{}): {}", 
-                    operationName, attempt, MAX_RETRIES, locator);
-                
+                logger.warn("{} failed (attempt {}/{}): {}",
+                        operationName, attempt, MAX_RETRIES, locator);
+
                 if (attempt < MAX_RETRIES) {
                     try {
                         Thread.sleep(RETRY_DELAY_MS);
@@ -148,9 +154,9 @@ public abstract class BaseActions {
                     logger.error("All retries exhausted for: {}", locator);
                     driver.takeScreenshot("action-failure-" + operationName);
                     Allure.addAttachment(
-                        operationName + "-failure",
-                        "text/plain",
-                        e.getMessage()
+                            operationName + "-failure",
+                            "text/plain",
+                            e.getMessage()
                     );
                     throw e;
                 }
@@ -165,5 +171,32 @@ public abstract class BaseActions {
     @FunctionalInterface
     protected interface Executable<T> {
         T execute() throws NoSuchElementException, TimeoutException;
+    }
+
+    protected void clickWithHealing(By locator, ElementIntent intent) {
+        try {
+            click(locator);
+        } catch (Exception originalFailure) {
+            logger.warn("Primary locator failed. Trying healing for {}", intent.elementName());
+
+            WebDriver webDriver =
+                    (WebDriver) driver.getUnderlyingDriver();
+
+            Optional<By> healedLocator =
+                    healingManager.heal(locator, webDriver, intent);
+
+            if (healedLocator.isPresent()) {
+                logger.warn(
+                        "Clicking healed locator. Original={}, Healed={}",
+                        locator,
+                        healedLocator.get()
+                );
+
+                click(healedLocator.get());
+                return;
+            }
+
+            throw originalFailure;
+        }
     }
 }

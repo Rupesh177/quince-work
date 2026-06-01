@@ -4,6 +4,8 @@ import com.quince.framework.data.FakerDataService;
 import com.quince.framework.experiment.ExperimentContext;
 import com.quince.framework.experiment.ExperimentUserService;
 import com.quince.framework.experiment.detection.VariantResolver;
+import io.qameta.allure.Allure;
+import io.qameta.allure.Step;
 
 public class ExperimentTestHelper {
 
@@ -28,15 +30,34 @@ public class ExperimentTestHelper {
         );
     }
 
+    @Step("Resolve Optimizely variation for flag: {flagKey}")
     public ExperimentContext resolve(String flagKey, String userId, Object webDriver) {
-        return variantResolver.resolve(flagKey, userId, webDriver);
+        ExperimentContext context = variantResolver.resolve(flagKey, userId, webDriver);
+        Allure.parameter("flagKey", context.flagKey());
+        Allure.parameter("userId", context.userId());
+        Allure.parameter("variation", context.variationKey());
+        Allure.parameter("enabled", context.enabled());
+        Allure.parameter("detectionSource", context.detectionSource());
+        Allure.parameter("confidence", context.confidence());
+
+        return context;
     }
 
+    @Step("Fetch string variable: {variableKey}")
     public String getStringVariable(String flagKey, String variableKey, String userId) {
-        return variantResolver.getStringVariable(flagKey, variableKey, userId);
+        String value = variantResolver.getStringVariable(flagKey, variableKey, userId);
+
+        Allure.parameter(variableKey, value);
+
+        return value;
     }
 
+    @Step("Fetch boolean variable: {variableKey}")
     public Boolean getBooleanVariable(String flagKey, String variableKey, String userId) {
-        return variantResolver.getBooleanVariable(flagKey, variableKey, userId);
+        Boolean value = variantResolver.getBooleanVariable(flagKey, variableKey, userId);
+
+        Allure.parameter(variableKey, value);
+
+        return value;
     }
 }

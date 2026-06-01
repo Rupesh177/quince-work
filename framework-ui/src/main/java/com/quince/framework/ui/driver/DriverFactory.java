@@ -33,7 +33,7 @@ public class DriverFactory {
         String driverType = config.get("driver.type", "selenium");
         String browser = config.get("browser", "chrome");
         boolean remoteEnabled = config.getBoolean("remote.enabled", false);
-        boolean healingEnabled = config.getBoolean("heal.enabled", true);
+        boolean healingEnabled = config.getBoolean("heal.enabled", false);
 
         logger.info("Creating driver: type={}, browser={}, remote={}, healing={}",
                 driverType, browser, remoteEnabled, healingEnabled);
@@ -45,10 +45,14 @@ public class DriverFactory {
         };
 
         // Wrap with Healenium if enabled
-//        if (healingEnabled) {
-//            driver = new HealeniumDriver(driver);
-//            logger.info("Applied Healenium healing wrapper");
-//        }
+        if (healingEnabled) {
+            try {
+                driver = new HealeniumDriver(driver);
+                logger.info("Applied Healenium healing wrapper");
+            } catch (Exception e) {
+                logger.warn("Healenium wrapper could not be applied. Continuing with normal driver.", e);
+            }
+        }
 
         return driver;
     }

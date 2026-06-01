@@ -1,4 +1,4 @@
-package com.quince.framework.core;
+package com.quince.framework.core.healing;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -16,13 +16,12 @@ public interface HealingStrategy {
      *
      * @param original    the original By locator that failed
      * @param driver      the WebDriver instance
-     * @param elementName human-readable element name for logging
+     * @paramelementName  human-readable element name for logging
      * @return healed locator if successful
      */
-    Optional<By> heal(By original, WebDriver driver, String elementName);
+    Optional<By> heal(By original,
+                      WebDriver driver,
+                      ElementIntent intent);
 
-    /**
-     * Returns the name of this strategy for logging.
-     */
     String getName();
 }

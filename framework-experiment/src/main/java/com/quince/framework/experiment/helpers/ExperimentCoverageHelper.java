@@ -3,6 +3,7 @@ package com.quince.framework.experiment.helpers;
 import com.quince.framework.experiment.ExperimentContext;
 import com.quince.framework.experiment.ExperimentUserService;
 import com.quince.framework.experiment.detection.VariantResolver;
+import io.qameta.allure.Step;
 
 public class ExperimentCoverageHelper {
 
@@ -15,6 +16,7 @@ public class ExperimentCoverageHelper {
         this.experimentUserService = experimentUserService;
     }
 
+    @Step("Find user for variation: {expectedVariation}")
     public String findUserForVariation(String flagKey,
                                        String expectedVariation,
                                        int maxAttempts) {

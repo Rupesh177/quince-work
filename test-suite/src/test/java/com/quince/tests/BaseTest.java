@@ -11,6 +11,8 @@ import com.quince.framework.data.DataRegistry;
 import io.qameta.allure.Allure;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.testng.ITestContext;
 import org.testng.ITestResult;
 import org.testng.annotations.BeforeSuite;
@@ -18,6 +20,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.AfterSuite;
 
+import java.io.ByteArrayInputStream;
 import java.util.UUID;
 
 /**
@@ -60,6 +63,24 @@ public class BaseTest {
     @AfterMethod
     public void afterMethod(ITestResult result) {
         try {
+            if (!result.isSuccess() && DriverManager.isDriverInitialized()) {
+
+                byte[] screenshot =
+                        ((TakesScreenshot) DriverManager.getDriver().getUnderlyingDriver())
+                                .getScreenshotAs(OutputType.BYTES);
+
+                Allure.addAttachment(
+                        "Failure Screenshot",
+                        "image/png",
+                        new ByteArrayInputStream(screenshot),
+                        ".png"
+                );
+            }
+        } catch (Exception e) {
+            logger.warn("Error attaching screenshot to Allure", e);
+        }
+
+        try {
             DataRegistry.cleanup();
         } catch (Exception e) {
             logger.warn("Error cleaning up data", e);
@@ -82,8 +103,10 @@ public class BaseTest {
             logger.warn("Error shutting down variant resolver", e);
         }
 
-        logger.info("Test result: {}",
-                result.isSuccess() ? "PASSED" : "FAILED");
+        logger.info(
+                "Test result: {}",
+                result.isSuccess() ? "PASSED" : "FAILED"
+        );
     }
 
     @AfterSuite
@@ -92,8 +115,9 @@ public class BaseTest {
     }
 
     protected void openPDP() {
-        DriverManager.getDriver().get(
-                config.get("base.url") + "/product/DEMO_SKU"
-        );
+        String url = config.get("base.url") + "/product/DEMO_SKU";
+
+        DriverManager.getDriver().get(url);
+        Allure.parameter("URL", url);
     }
 }

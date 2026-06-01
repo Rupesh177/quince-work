@@ -32,7 +32,7 @@ public class HealeniumDriver implements UIDriver {
             healed = SelfHealingDriver.create(underlyingWebDriver);
             logger.info("Healenium SelfHealingDriver initialized");
         } catch (Exception e) {
-            logger.error("Failed to initialize Healenium; continuing without healing", e);
+            logger.warn("Failed to initialize Healenium; continuing without healing", e);
         }
         this.healedDriver = healed;
     }

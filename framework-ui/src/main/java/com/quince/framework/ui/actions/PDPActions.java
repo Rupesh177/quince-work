@@ -1,6 +1,7 @@
 package com.quince.framework.ui.actions;
 
 import com.quince.framework.core.driver.UIDriver;
+import com.quince.framework.core.healing.ElementIntent;
 import com.quince.framework.experiment.ExperimentContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -8,6 +9,7 @@ import org.openqa.selenium.By;
 import org.testng.Assert;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -21,12 +23,13 @@ public class PDPActions extends BaseActions {
     private static final By PRODUCT_TITLE = By.cssSelector("h1.product-title");
     private static final By PRODUCT_PRICE = By.cssSelector("[data-testid='product-price']");
     private static final By PRICE_MODAL = By.id("price-modal");
-    private static final By CTA_TOP = By.id("add-to-cart-top");
+    private static final By CTA_TOP =
+            By.xpath("//button[@data-testid='add-to-cart-button' and normalize-space()='Add to Cart']");
     private static final By CTA_BOTTOM = By.cssSelector("button.add-to-cart-bottom");
     private static final By CTA_STICKY = By.id("sticky-bar-cta");
     private static final By RECOMMENDATIONS = By.cssSelector("[data-testid='recommendations'] .product-item");
     private static final By CART_COUNT = By.cssSelector("[data-cart-count]");
-    private static final By CART_BUTTON= By.xpath("//button[@data-testid='cart-button' and contains(text(),'Cart')]");
+    private static final By CART_BUTTON = By.xpath("//button[@data-testid='cart-button' and contains(text(),'Cart')]");
 
     public PDPActions(UIDriver driver) {
         super(driver);
@@ -81,11 +84,11 @@ public class PDPActions extends BaseActions {
      */
     public void addToCart() {
         logger.info("Adding product to cart");
-        
+
         // Fallback chain
         Optional<String> successfulCta = tryClick(CTA_TOP, "top-cta")
-            .or(() -> tryClick(CTA_BOTTOM, "bottom-cta"))
-            .or(() -> tryClick(CTA_STICKY, "sticky-cta"));
+                .or(() -> tryClick(CTA_BOTTOM, "bottom-cta"))
+                .or(() -> tryClick(CTA_STICKY, "sticky-cta"));
 
         if (successfulCta.isPresent()) {
             logger.info("Successfully clicked CTA: {}", successfulCta.get());
@@ -100,8 +103,8 @@ public class PDPActions extends BaseActions {
      */
     public boolean isAddToCartPresent() {
         return softAssertVisible(CTA_TOP) ||
-               softAssertVisible(CTA_BOTTOM) ||
-               softAssertVisible(CTA_STICKY);
+                softAssertVisible(CTA_BOTTOM) ||
+                softAssertVisible(CTA_STICKY);
     }
 
     /**
@@ -117,7 +120,7 @@ public class PDPActions extends BaseActions {
      */
     public void validatePricingDisplay(ExperimentContext context) {
         logger.info("Validating pricing display for variant: {}", context.variationKey());
-        
+
         switch (context.variationKey()) {
             case "control" -> {
                 // Control: inline price visible
@@ -180,4 +183,13 @@ public class PDPActions extends BaseActions {
     public String getCtaLabel() {
         return getText(CTA_TOP).trim();
     }
+
+//    private static final ElementIntent ADD_TO_CART_INTENT =
+//            new ElementIntent(
+//                    "Add To Cart CTA",
+//                    "Add to Cart",
+//                    "button",
+//                    "button",
+//                    Map.of("data-testid", "add-to-cart-button")
+//            );
 }

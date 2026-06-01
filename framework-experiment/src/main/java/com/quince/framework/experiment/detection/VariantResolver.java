@@ -190,7 +190,6 @@ public class VariantResolver {
      */
     private void attachToAllure(ExperimentContext context) {
         try {
-            Allure.parameter("variant", context.variationKey());
             Allure.parameter("flagKey", context.flagKey());
             Allure.parameter("detectionSource", context.detectionSource());
             Allure.parameter("confidence", String.format("%.2f", context.confidence()));
