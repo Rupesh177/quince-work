@@ -129,7 +129,7 @@ public class PDPExperimentTest extends BaseTest {
     @Test(groups = {"smoke", "experiment"})
     @Story("PDP CTA Treatment A Variant")
     @Description("Validate cart button visibility using cart_button variable")
-    public void testTreatmentAVariantCartButtonVisibility() {
+    public void testTreatmentAVariantCartButtonVisibility() throws InterruptedException {
         String expectedVariation = "treatment_a";
 
         // Finds a generated user bucketed into treatment_a.
@@ -169,99 +169,100 @@ public class PDPExperimentTest extends BaseTest {
                 expectedCartButton,
                 "Cart button visibility should match Optimizely cart_button variable"
         );
+
     }
 
-//    @Test(groups = {"regression", "experiment"}, dataProvider = "allPriceDisplayVariants")
-//    @Story("Pricing Display")
-//    @Description("Validate price display variable behavior across pdp_price_display variants")
-//    public void testPricingDisplay_AllVariants(String expectedVariation) {
-//
-//        // Finds a generated user bucketed into the expected price-display variation.
-//        String userId = experiment.findUserForVariation(PDP_PRICE_FLAG, expectedVariation);
-//
-//        // Opens PDP for UI validation.
-//        openPDP();
-//
-//        // Resolves Optimizely decision for the discovered user.
-//        ExperimentContext context = experiment.resolve(
-//                PDP_PRICE_FLAG,
-//                userId,
-//                DriverManager.getDriver().getUnderlyingDriver()
-//        );
-//
-//        Assert.assertEquals(
-//                context.variationKey(),
-//                expectedVariation,
-//                "Resolved variation should match expected variation"
-//        );
-//
-//        Assert.assertTrue(
-//                context.enabled(),
-//                "Price display feature flag should be enabled"
-//        );
-//
-//        // Reads Optimizely variables for price display behavior.
-//        String displayMode = experiment.getStringVariable(
-//                PDP_PRICE_FLAG,
-//                "display_mode",
-//                userId
-//        );
-//
-//        String pricePosition = experiment.getStringVariable(
-//                PDP_PRICE_FLAG,
-//                "price_position",
-//                userId
-//        );
-//
-//        logger.info(
-//                "Price Display Validation | Variation={}, User={}, display_mode={}, price_position={}",
-//                context.variationKey(),
-//                userId,
-//                displayMode,
-//                pricePosition
-//        );
-//
-//        Assert.assertNotNull(
-//                displayMode,
-//                "display_mode should not be null"
-//        );
-//
-//        Assert.assertNotNull(
-//                pricePosition,
-//                "price_position should not be null"
-//        );
-//
-//        Assert.assertTrue(
-//                List.of("inline", "modal", "treatment_a").contains(displayMode),
-//                "display_mode should be valid"
-//        );
-//
-//        Assert.assertTrue(
-//                List.of("below_title", "above_cta").contains(pricePosition),
-//                "price_position should be valid"
-//        );
-//
-//        // Reads price using variant-aware fallback logic in PDPActions.
-//        String price = pdp.getPrice();
-//
-//        Assert.assertFalse(
-//                price.isEmpty(),
-//                "Price should be available for variant: " + expectedVariation
-//        );
-//
-//        logger.info(
-//                "Price validation successful | Variation={}, Price={}",
-//                expectedVariation,
-//                price
-//        );
-//    }
-//
-//    @DataProvider(name = "allPriceDisplayVariants")
-//    public Object[][] allPriceDisplayVariants() {
-//        return new Object[][]{
-//                {"control"},
-//                {"treatment_a"},
-//                {"treatment_b"}
-//        };
-//    }
+    @Test(groups = {"regression", "experiment"}, dataProvider = "allPriceDisplayVariants")
+    @Story("Pricing Display")
+    @Description("Validate price display variable behavior across pdp_price_display variants")
+    public void testPricingDisplay_AllVariants(String expectedVariation) {
+
+        // Finds a generated user bucketed into the expected price-display variation.
+        String userId = experiment.findUserForVariation(PDP_PRICE_FLAG, expectedVariation);
+
+        // Opens PDP for UI validation.
+        openPDP();
+
+        // Resolves Optimizely decision for the discovered user.
+        ExperimentContext context = experiment.resolve(
+                PDP_PRICE_FLAG,
+                userId,
+                DriverManager.getDriver().getUnderlyingDriver()
+        );
+
+        Assert.assertEquals(
+                context.variationKey(),
+                expectedVariation,
+                "Resolved variation should match expected variation"
+        );
+
+        Assert.assertTrue(
+                context.enabled(),
+                "Price display feature flag should be enabled"
+        );
+
+        // Reads Optimizely variables for price display behavior.
+        String displayMode = experiment.getStringVariable(
+                PDP_PRICE_FLAG,
+                "display_mode",
+                userId
+        );
+
+        String pricePosition = experiment.getStringVariable(
+                PDP_PRICE_FLAG,
+                "price_position",
+                userId
+        );
+
+        logger.info(
+                "Price Display Validation | Variation={}, User={}, display_mode={}, price_position={}",
+                context.variationKey(),
+                userId,
+                displayMode,
+                pricePosition
+        );
+
+        Assert.assertNotNull(
+                displayMode,
+                "display_mode should not be null"
+        );
+
+        Assert.assertNotNull(
+                pricePosition,
+                "price_position should not be null"
+        );
+
+        Assert.assertTrue(
+                List.of("inline", "modal", "treatment_a").contains(displayMode),
+                "display_mode should be valid"
+        );
+
+        Assert.assertTrue(
+                List.of("below_title", "above_cta").contains(pricePosition),
+                "price_position should be valid"
+        );
+
+        // Reads price using variant-aware fallback logic in PDPActions.
+        String price = pdp.getPrice();
+
+        Assert.assertFalse(
+                price.isEmpty(),
+                "Price should be available for variant: " + expectedVariation
+        );
+
+        logger.info(
+                "Price validation successful | Variation={}, Price={}",
+                expectedVariation,
+                price
+        );
+    }
+
+    @DataProvider(name = "allPriceDisplayVariants")
+    public Object[][] allPriceDisplayVariants() {
+        return new Object[][]{
+                {"control"},
+                {"treatment_a"},
+                {"treatment_b"}
+        };
+    }
 }
