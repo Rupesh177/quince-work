@@ -1,5 +1,7 @@
-package com.quince.framework.experiment;
+package com.quince.framework.experiment.helpers;
 
+import com.quince.framework.experiment.ExperimentContext;
+import com.quince.framework.experiment.ExperimentUserService;
 import com.quince.framework.experiment.detection.VariantResolver;
 
 public class ExperimentCoverageHelper {

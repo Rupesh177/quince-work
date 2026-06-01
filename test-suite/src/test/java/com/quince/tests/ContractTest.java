@@ -19,18 +19,31 @@ public class ContractTest extends BaseTest {
 
     @Test(groups = {"smoke", "experiment"})
     @Story("PDP CTA Position")
-    @Description("Validate PDP CTA behavior using Optimizely resolved variation and cta_position variable")
-    public void testPdpCtaPositionVariableControlsUi() {
+    @Description("Validate treatment_b CTA behavior using Optimizely cta_position variable")
+    public void testTreatmentB_CtaPositionControlsUi() {
         String flagKey = "pdp_cta_position";
+        String expectedVariation = "treatment_b";
 
-        DriverManager.getDriver().get(
-                config.get("base.url", "http://localhost:5173") + "/product/DEMO_SKU"
+        // Finds a generated user bucketed into treatment_b.
+        String userId = experiment.findUserForVariation(
+                flagKey,
+                expectedVariation
         );
 
-        ExperimentContext context = variantResolver.resolve(
+        // Opens PDP for UI validation.
+        openPDP();
+
+        // Resolves Optimizely decision for the discovered user.
+        ExperimentContext context = experiment.resolve(
                 flagKey,
-                testUserId,
+                userId,
                 DriverManager.getDriver().getUnderlyingDriver()
+        );
+
+        Assert.assertEquals(
+                context.variationKey(),
+                expectedVariation,
+                "Expected treatment_b variation"
         );
 
         Assert.assertTrue(
@@ -38,42 +51,36 @@ public class ContractTest extends BaseTest {
                 "Feature flag should be enabled"
         );
 
-        Assert.assertTrue(
-                List.of("control", "treatment_a", "treatment_b")
-                        .contains(context.variationKey()),
-                "Variation should be one of configured Optimizely variations"
-        );
-
-        String ctaPosition = variantResolver.getStringVariable(
+        // Reads cta_position variable from Optimizely.
+        String ctaPosition = experiment.getStringVariable(
                 flagKey,
                 "cta_position",
-                testUserId
+                userId
         );
 
-        Assert.assertTrue(
-                List.of("top", "bottom", "sticky").contains(ctaPosition),
-                "cta_position should be one of expected values"
+        Assert.assertEquals(
+                ctaPosition,
+                "sticky",
+                "treatment_b should have sticky CTA"
         );
 
         logger.info(
-                "AB Test Proof | Flag={}, Enabled={}, Variation={}, cta_position={}",
-                flagKey,
-                context.enabled(),
+                "AB Test Proof | User={}, Variation={}, cta_position={}",
+                userId,
                 context.variationKey(),
                 ctaPosition
         );
 
-        PDPActions pdp = new PDPActions(DriverManager.getDriver());
-
+        // Validates CTA placement based on Optimizely variable.
         pdp.validateCtaPosition(ctaPosition);
 
+        // Clicks CTA using fallback chain.
         pdp.addToCart();
 
         logger.info(
-                "PDP CTA validation successful for variation={} and cta_position={}",
+                "Treatment_b validation successful | Variation={}, cta_position={}",
                 context.variationKey(),
                 ctaPosition
         );
     }
-
 }

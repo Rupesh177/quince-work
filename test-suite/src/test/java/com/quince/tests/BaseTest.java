@@ -3,6 +3,8 @@ package com.quince.tests;
 import com.quince.framework.core.driver.DriverManager;
 import com.quince.framework.core.driver.WaitManager;
 import com.quince.framework.core.config.ConfigReader;
+import com.quince.framework.experiment.helpers.ExperimentTestHelper;
+import com.quince.framework.ui.actions.PDPActions;
 import com.quince.framework.ui.driver.DriverFactory;
 import com.quince.framework.experiment.detection.VariantResolver;
 import com.quince.framework.data.DataRegistry;
@@ -24,10 +26,12 @@ import java.util.UUID;
  */
 public class BaseTest {
     protected static final Logger logger = LogManager.getLogger(BaseTest.class);
-    
+
     protected VariantResolver variantResolver;
     protected String testUserId;
     protected ConfigReader config;
+    protected ExperimentTestHelper experiment;
+    protected PDPActions pdp;
 
     @BeforeSuite
     public void beforeSuite() {
@@ -40,14 +44,17 @@ public class BaseTest {
     @BeforeMethod
     public void beforeMethod(ITestContext context) {
         logger.info("========== {} ==========", context.getCurrentXmlTest().getName());
-        
+
         this.config = ConfigReader.getInstance();
         this.testUserId = "user_" + UUID.randomUUID();
         this.variantResolver = new VariantResolver();
-        
+        this.experiment = new ExperimentTestHelper(variantResolver);
+
         // Initialize driver
         DriverManager.setDriver(DriverFactory.createDriver());
         WaitManager.initializeWait();
+
+        this.pdp = new PDPActions(DriverManager.getDriver());
     }
 
     @AfterMethod
@@ -75,12 +82,18 @@ public class BaseTest {
             logger.warn("Error shutting down variant resolver", e);
         }
 
-        logger.info("Test result: {}", 
-            result.isSuccess() ? "PASSED" : "FAILED");
+        logger.info("Test result: {}",
+                result.isSuccess() ? "PASSED" : "FAILED");
     }
 
     @AfterSuite
     public void afterSuite() {
         logger.info("========== TEST SUITE END ==========");
+    }
+
+    protected void openPDP() {
+        DriverManager.getDriver().get(
+                config.get("base.url") + "/product/DEMO_SKU"
+        );
     }
 }

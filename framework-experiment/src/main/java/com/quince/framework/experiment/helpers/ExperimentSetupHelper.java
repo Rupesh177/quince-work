@@ -1,4 +1,4 @@
-package com.quince.framework.experiment;
+package com.quince.framework.experiment.helpers;
 
 import com.quince.framework.core.experiment.FlagProvider;
 import com.quince.framework.experiment.flags.OptimizelyFlagProvider;

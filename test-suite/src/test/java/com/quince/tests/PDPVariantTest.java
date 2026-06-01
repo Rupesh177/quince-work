@@ -2,7 +2,7 @@ package com.quince.tests;
 
 import com.quince.framework.core.driver.DriverManager;
 import com.quince.framework.experiment.ExperimentContext;
-import com.quince.framework.experiment.ExperimentSetupHelper;
+import com.quince.framework.experiment.helpers.ExperimentSetupHelper;
 import com.quince.framework.ui.actions.PDPActions;
 import io.qameta.allure.Description;
 import io.qameta.allure.Story;
