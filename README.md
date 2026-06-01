@@ -42,11 +42,11 @@
 
 ### AI/ML Components
 
-| Component | Technology | Version | Purpose |
-|-----------|--------|---------|---------|
-| **LLM Integration** | Ollama | Latest | Locator healing, root cause analysis |
+| Component | Technology     | Version | Purpose |
+|-----------|----------------|---------|---------|
+| **LLM Integration** | OpenAI         | Latest | Locator healing, root cause analysis |
 | **Feature Flags** | Optimizely SDK | 4.1+ | Feature flag management |
-| **Experiment Detection** | Custom | 1.0 | Multi-signal variant detection |
+| **Experiment Detection** | Custom         | 1.0 | Multi-signal variant detection |
 
 ### Infrastructure & Reporting
 
