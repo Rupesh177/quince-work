@@ -57,7 +57,7 @@ public class PDPVariantTest extends BaseTest {
         // Cleanup
         setupHelper.clearForcedVariant("pdp_cta_position", testUserId);
     }
-    //healingManager.heal(CTA_TOP, webDriver, ADD_TO_CART_INTENT);
+//    healingManager.heal(CTA_TOP, webDriver, ADD_TO_CART_INTENT);
 //    public void addToCartWithHealing() {
 //        clickWithHealing(CTA_TOP, ADD_TO_CART_INTENT);
 //    }

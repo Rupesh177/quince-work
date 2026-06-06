@@ -92,7 +92,8 @@ public class DriverFactory {
                 "--disable-blink-features=AutomationControlled",
                 "--disable-dev-shm-usage",
                 "--no-sandbox",
-                "--disable-gpu"
+                "--disable-gpu",
+                "start-maximized"
         );
 
         if (remoteEnabled) {

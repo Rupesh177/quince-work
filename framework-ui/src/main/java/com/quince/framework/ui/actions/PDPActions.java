@@ -24,12 +24,12 @@ public class PDPActions extends BaseActions {
     private static final By PRODUCT_PRICE = By.cssSelector("[data-testid='product-price']");
     private static final By PRICE_MODAL = By.id("price-modal");
     private static final By CTA_TOP =
-            By.xpath("//button[@data-testid='add-to-cart-button' and normalize-space()='Add to Cart']");
+            By.xpath("//button[@data-testid='add-to-cart-button' and contains(normalize-space(.),'Add to Cart')]");
     private static final By CTA_BOTTOM = By.cssSelector("button.add-to-cart-bottom");
     private static final By CTA_STICKY = By.id("sticky-bar-cta");
     private static final By RECOMMENDATIONS = By.cssSelector("[data-testid='recommendations'] .product-item");
     private static final By CART_COUNT = By.cssSelector("[data-cart-count]");
-    private static final By CART_BUTTON = By.xpath("//button[@data-testid='cart-button' and contains(text(),'Cart')]");
+    private static final By CART_BUTTON = By.xpath("//button[@data-testid='cart-button']");
 
     public PDPActions(UIDriver driver) {
         super(driver);
@@ -51,32 +51,28 @@ public class PDPActions extends BaseActions {
      */
     public String getPrice() {
         logger.info("Getting product price");
+
         try {
-            // Try inline price first (control)
-            if (driver.isDisplayed(PRODUCT_PRICE)) {
-                String price = getText(PRODUCT_PRICE);
-                logger.info("Found inline price: {}", price);
-                return price;
-            }
+            waitForVisible(PRODUCT_PRICE);
+            String price = getText(PRODUCT_PRICE);
+            logger.info("Found inline price: {}", price);
+            return price;
         } catch (Exception e) {
-            logger.debug("Inline price not found, trying modal");
+            logger.debug("Inline price not visible after wait, trying modal price");
         }
 
         try {
-            // Try modal price
-            if (driver.isDisplayed(PRICE_MODAL)) {
-                String price = getText(By.cssSelector("#price-modal .price-value"));
-                logger.info("Found modal price: {}", price);
-                return price;
-            }
+            waitForVisible(PRICE_MODAL);
+            String price = getText(By.cssSelector("#price-modal .price-value"));
+            logger.info("Found modal price: {}", price);
+            return price;
         } catch (Exception e) {
-            logger.debug("Modal price not found");
+            logger.debug("Modal price not visible after wait");
         }
 
         logger.warn("No price element found");
         return "";
     }
-
     /**
      * Adds product to cart with fallback chain.
      * Tries: top CTA → bottom CTA → sticky bar CTA
@@ -102,6 +98,15 @@ public class PDPActions extends BaseActions {
      * Checks if add-to-cart is present.
      */
     public boolean isAddToCartPresent() {
+        logger.info("Checking Add to Cart presence");
+
+        try {
+            waitForVisible(CTA_TOP);
+            return true;
+        } catch (Exception e) {
+            logger.debug("Top CTA not visible yet, trying fallback CTAs");
+        }
+
         return softAssertVisible(CTA_TOP) ||
                 softAssertVisible(CTA_BOTTOM) ||
                 softAssertVisible(CTA_STICKY);
@@ -111,7 +116,13 @@ public class PDPActions extends BaseActions {
      * Checks if cart is present.
      */
     public boolean isCartPresent() {
-        return driver.isDisplayed(CART_BUTTON);
+        try {
+            waitForVisible(CART_BUTTON);
+            return true;
+        } catch (Exception e) {
+            logger.warn("Cart button not visible for locator: {}", CART_BUTTON);
+            return false;
+        }
     }
 
 

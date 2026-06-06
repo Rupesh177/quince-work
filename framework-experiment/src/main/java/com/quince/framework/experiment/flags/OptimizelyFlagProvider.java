@@ -88,7 +88,7 @@ public class OptimizelyFlagProvider implements FlagProvider {
             }
             HttpProjectConfigManager configManager = HttpProjectConfigManager.builder()
                     .withSdkKey(sdkKey)
-                    .withPollingInterval(5L, TimeUnit.MINUTES)
+                    .withPollingInterval(5L, TimeUnit.MINUTES)  //Every 5 minutes: hits Optimizely CDN URL:→ fetches latest experiment config (flags, variations, traffic %) → updates the SDK automatically
                     .build();
 
             Optimizely client = Optimizely.builder()
@@ -169,44 +169,7 @@ public class OptimizelyFlagProvider implements FlagProvider {
             return "control";
         }
     }
-//@Override
-//public String getVariation(String flagKey, String userId, Map<String, Object> attributes) {
-//        if (!initialized) {
-//            logger.warn("Optimizely SDK not initialized, returning control");
-//            return "control";
-//        }
-//        try {
-//            Map<String, Object> attrs = attributes != null ? attributes : new HashMap<>();
-//            System.out.println("Valid: " + optimizelyClient.isValid());
-//
-//// 2. Is the flag enabled for this user?
-//            System.out.println("Enabled: " + optimizelyClient.isFeatureEnabled(flagKey, userId, attrs));
-//
-//// 3. Then fetch the variation
-//            String variation = optimizelyClient.getFeatureVariableString(flagKey, "cta_position", userId, attrs);
-//            System.out.println("Value: " + variation);
-//
-////            String variation = optimizelyClient.getFeatureVariableString(
-////                flagKey, "variant_key", userId, attrs
-////            );
-//
-//            // If no explicit variant key, fall back to checking experiment variation
 
-    /// /            if (variation == null || variation.isBlank()) {
-    /// /                variation = String.valueOf(optimizelyClient.activate(flagKey, userId, attrs));
-    /// /            }
-//
-//            if (variation == null || variation.isBlank()) {
-//                variation = "control";
-//            }
-//
-//            logger.debug("getVariation({}, {}) = {}", flagKey, userId, variation);
-//            return variation;
-//        } catch (Exception e) {
-//            logger.error("Error getting feature variation: {}", flagKey, e);
-//            return "control";
-//        }
-//    }
     @Override
     public void forceVariation(String flagKey, String userId, String variationKey) {
         logger.warn(
