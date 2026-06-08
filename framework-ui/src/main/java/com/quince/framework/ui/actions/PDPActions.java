@@ -73,6 +73,7 @@ public class PDPActions extends BaseActions {
         logger.warn("No price element found");
         return "";
     }
+
     /**
      * Adds product to cart with fallback chain.
      * Tries: top CTA → bottom CTA → sticky bar CTA

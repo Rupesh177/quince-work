@@ -3,15 +3,12 @@ package com.quince.tests;
 
 import com.quince.framework.core.driver.DriverManager;
 import com.quince.framework.experiment.ExperimentContext;
-import com.quince.framework.ui.actions.PDPActions;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.util.List;
 
 @Epic("Experiments")
 @Feature("PDP Variant Testing")

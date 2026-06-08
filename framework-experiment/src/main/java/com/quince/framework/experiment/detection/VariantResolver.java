@@ -25,13 +25,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * 3. HTTP Headers/API
  * 4. DOM
  * 5. Structural Heuristic
- * 
+ * <p>
  * Logs all detection attempts and handles signal disagreements.
  */
 public class VariantResolver {
     private static final Logger logger = LogManager.getLogger(VariantResolver.class);
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    
+
     private final FlagProvider flagProvider;
     private final List<VariantDetector> detectors;
     private final Map<String, ExperimentContext> resolutionCache = new ConcurrentHashMap<>();
@@ -41,10 +41,10 @@ public class VariantResolver {
     public VariantResolver() {
         this.flagProvider = new OptimizelyFlagProvider();
         this.detectors = List.of(
-            new CookieVariantDetector(),
-            new HeaderVariantDetector("http://localhost:8080"),
-            new DomVariantDetector(),
-            new StructuralVariantDetector()
+                new CookieVariantDetector(),
+                new HeaderVariantDetector("http://localhost:8080"),
+                new DomVariantDetector(),
+                new StructuralVariantDetector()
         );
     }
 
@@ -54,7 +54,7 @@ public class VariantResolver {
      */
     public ExperimentContext resolve(String flagKey, String userId, Object webDriver) {
         String cacheKey = flagKey + ":" + userId;
-        
+
         // Return cached result if available
         if (resolutionCache.containsKey(cacheKey)) {
             logger.debug("Returning cached variant for {}", cacheKey);
@@ -63,12 +63,12 @@ public class VariantResolver {
 
         Map<String, String> allSignals = new HashMap<>();
         Map<String, Object> attributes = Map.of(
-            "env", ConfigReader.getInstance().get("env", "local"),
-            "platform", "web",
-            "device", "desktop"
+                "env", ConfigReader.getInstance().get("env", "local"),
+                "platform", "web",
+                "device", "desktop"
         );
 
-        // Signal 1: Optimizely SDK (Primary)
+//         Signal 1: Optimizely SDK (Primary)
         logger.info("=== Resolving variant for {} ===", flagKey);
         ExperimentContext result = tryOptimizelySDK(flagKey, userId, attributes, allSignals);
         if (result != null) {
@@ -77,32 +77,48 @@ public class VariantResolver {
             return result;
         }
 
+//        ExperimentContext result = null;
+
         // Build detection context
         DetectionContext context = new DetectionContext(
-            flagKey, userId,
-            webDriver instanceof org.openqa.selenium.WebDriver ? (org.openqa.selenium.WebDriver) webDriver : null,
-            new HashMap<>(), new HashMap<>(), "", attributes
+                flagKey, userId,
+                webDriver instanceof org.openqa.selenium.WebDriver ? (org.openqa.selenium.WebDriver) webDriver : null,
+                new HashMap<>(), new HashMap<>(), "", attributes
         );
 
         // Try remaining detectors
         for (VariantDetector detector : detectors) {
             try {
+                logger.info("Trying detector: {}", detector.getName());
+
                 Optional<String> variant = detector.detect(flagKey, context);
+
+                logger.info(
+                        "Detector {} returned: {}",
+                        detector.getName(),
+                        variant.orElse("EMPTY")
+                );
+
                 if (variant.isPresent()) {
                     allSignals.put(detector.getName(), variant.get());
+
                     result = new ExperimentContext.Builder()
-                        .flagKey(flagKey)
-                        .userId(userId)
-                        .variationKey(variant.get())
-                        .enabled(true)
-                        .detectionSource(detector.getName())
-                        .confidence(0.8)
-                        .addAttribute("platform", "web")
-                        .build();
+                            .flagKey(flagKey)
+                            .userId(userId)
+                            .variationKey(variant.get())
+                            .enabled(true)
+                            .detectionSource(detector.getName())
+                            .confidence(0.8)
+                            .addAttribute("platform", "web")
+                            .build();
+
                     cacheAndReport(cacheKey, result, allSignals);
                     attachToAllure(result);
                     return result;
                 }
+
+                allSignals.put(detector.getName(), "EMPTY");
+
             } catch (Exception e) {
                 logger.warn("Detector {} failed", detector.getName(), e);
                 allSignals.put(detector.getName(), "ERROR: " + e.getMessage());
@@ -111,15 +127,15 @@ public class VariantResolver {
 
         // Fallback: control variant
         result = new ExperimentContext.Builder()
-            .flagKey(flagKey)
-            .userId(userId)
-            .variationKey("control")
-            .enabled(true)
-            .detectionSource("default-fallback")
-            .confidence(1.0)
-            .addAttribute("platform", "web")
-            .build();
-        
+                .flagKey(flagKey)
+                .userId(userId)
+                .variationKey("control")
+                .enabled(true)
+                .detectionSource("default-fallback")
+                .confidence(1.0)
+                .addAttribute("platform", "web")
+                .build();
+
         logger.error("All detection signals failed, using control variant for {}", flagKey);
         cacheAndReport(cacheKey, result, allSignals);
         attachToAllure(result);
@@ -129,25 +145,25 @@ public class VariantResolver {
     /**
      * Attempts detection via Optimizely SDK.
      */
-    private ExperimentContext tryOptimizelySDK(String flagKey, String userId, 
-                                              Map<String, Object> attributes, 
-                                              Map<String, String> allSignals) {
+    private ExperimentContext tryOptimizelySDK(String flagKey, String userId,
+                                               Map<String, Object> attributes,
+                                               Map<String, String> allSignals) {
         try {
             String variation = flagProvider.getVariation(flagKey, userId, attributes);
             boolean enabled = flagProvider.isEnabled(flagKey, userId, attributes);
-            
+
             allSignals.put("OptimizelySDK", variation);
-            
+
             ExperimentContext context = new ExperimentContext.Builder()
-                .flagKey(flagKey)
-                .userId(userId)
-                .variationKey(variation)
-                .enabled(enabled)
-                .detectionSource("OptimizelySDK")
-                .confidence(1.0)
-                .addAttribute("platform", "web")
-                .build();
-            
+                    .flagKey(flagKey)
+                    .userId(userId)
+                    .variationKey(variation)
+                    .enabled(enabled)
+                    .detectionSource("OptimizelySDK")
+                    .confidence(1.0)
+                    .addAttribute("platform", "web")
+                    .build();
+
             logger.info("SDK resolved variant: {} -> {}", flagKey, variation);
             return context;
         } catch (Exception e) {
@@ -162,7 +178,7 @@ public class VariantResolver {
      */
     private void cacheAndReport(String cacheKey, ExperimentContext context, Map<String, String> allSignals) {
         resolutionCache.put(cacheKey, context);
-        
+
         Map<String, Object> entry = new HashMap<>();
         entry.put("timestamp", System.currentTimeMillis());
         entry.put("cacheKey", cacheKey);
@@ -172,14 +188,14 @@ public class VariantResolver {
         entry.put("source", context.detectionSource());
         entry.put("confidence", context.confidence());
         entry.put("allSignals", allSignals);
-        
+
         resolutionHistory.add(entry);
-        
+
         // Write to report file
         try {
             Files.createDirectories(resolutionReportPath.getParent());
-            Files.writeString(resolutionReportPath, 
-                objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resolutionHistory));
+            Files.writeString(resolutionReportPath,
+                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(resolutionHistory));
         } catch (IOException e) {
             logger.warn("Error writing variant resolution report", e);
         }
